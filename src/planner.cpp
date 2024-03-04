@@ -23,7 +23,7 @@ class PathPlanner : public rclcpp::Node
         path_publisher = this->create_publisher<nav_msgs::msg::Path>("path", 10);
         map_subscription = this->create_subscription<nav_msgs::msg::OccupancyGrid>("map", 10, std::bind(&PathPlanner::map_callback, this, _1));
         goal_subscription=this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose",10,std::bind(&PathPlanner::goal_callback,this,_1));
-        pose_subscription=this->create_subscription<nav_msgs::msg::Odometry>("odom",10,std::bind(&PathPlanner::initial_pose,this,_1));
+        pose_subscription=this->create_subscription<nav_msgs::msg::Odometry>("odom",10,std::bind(&PathPlanner::pose_callback,this,_1));
         timer_ = this->create_wall_timer(50ms, std::bind(&PathPlanner::timer_callback, this));
     }
 
@@ -38,15 +38,17 @@ class PathPlanner : public rclcpp::Node
     
     int start_row, start_col;
     int map_width, map_height;
-    float resolution;
+    float resolution=0.1;
     std::vector<int8_t> map_data;
 
     int threshold=80;
     bool once=false;
     float inflation_m=0.1;
     int inflation;
+
     bool flag_0=false;
     bool flag_1=false;
+    int pose_update=10;
 
     float start_x, start_y;
 
@@ -55,6 +57,29 @@ class PathPlanner : public rclcpp::Node
 
     void timer_callback()
     {   
+        if(this->once==false){
+            this->dstar.init(0,0,0,0);
+            this->once=true;}
+
+        if(this->flag_0==true){
+            if(this->flag_1==true){
+                this->dstar.updateStart(this->start_x / this->resolution, this->start_y / this->resolution);
+                this->dstar.replan();
+
+                this->pose_array.clear();
+
+                this->mypath = this->dstar.getPath();
+
+                for (state path_state : this->mypath){
+                    this->path_points.pose.position.x=path_state.x * this->resolution;
+                    this->path_points.pose.position.y=path_state.y * this->resolution;
+                    this->pose_array.push_back(this->path_points);
+                }
+                
+                RCLCPP_INFO(this->get_logger(), "Path updated");  
+                }
+        }
+
         this->path.header.frame_id="odom";
         this->path.poses = this->pose_array;
         path_publisher->publish(this->path);
@@ -62,7 +87,6 @@ class PathPlanner : public rclcpp::Node
 
     void map_callback(const nav_msgs::msg::OccupancyGrid::SharedPtr map)
     {   
-
         RCLCPP_INFO(this->get_logger(), "Map generated"); 
         
         this->resolution=map->info.resolution;
@@ -77,18 +101,9 @@ class PathPlanner : public rclcpp::Node
         this->inflation = this->inflation_m / this->resolution;
         RCLCPP_INFO(this->get_logger(), "Inflation: %i", this->inflation);
 
-        if(this->once==false){
-            this->dstar.init(0,0,0,0);
-            this->once=true;}
-
-        if(this->flag_0==true){
-            if(this->flag_1==false){
-                dstar.updateStart(this->start_x / this->resolution, this->start_y / this->resolution);
-                this->flag_1=true;
-            }
-        }
-
         int count=0;
+
+        this->flag_1=false;
                
         for(int i=0; i<this->map_height; i++){
             for(int j=0; j<this->map_width; j++){
@@ -104,21 +119,9 @@ class PathPlanner : public rclcpp::Node
             }
         }
    
-
-        this->dstar.replan();
         RCLCPP_INFO(this->get_logger(), "Planning done"); 
 
-        this->pose_array.clear();
-
-        this->mypath = this->dstar.getPath();
-
-        for (state path_state : this->mypath){
-            this->path_points.pose.position.x=path_state.x * this->resolution;
-            this->path_points.pose.position.y=path_state.y * this->resolution;
-            this->pose_array.push_back(this->path_points);
-        }
-        
-        RCLCPP_INFO(this->get_logger(), "Path updated");   
+        this->flag_1=true; 
     
     }
 
@@ -129,29 +132,16 @@ class PathPlanner : public rclcpp::Node
 
         this->goal_x=goal->pose.position.x;
         this->goal_y=goal->pose.position.y;
-        this->dstar.updateGoal(this->goal_x / this->resolution, this->goal_y / this->resolution); 
-
-        this->dstar.replan();
-        RCLCPP_INFO(this->get_logger(), "Planning done"); 
-
-        this->pose_array.clear();
-
-        this->mypath = this->dstar.getPath();
-
-        for (state path_state : this->mypath){
-            this->path_points.pose.position.x=path_state.x * this->resolution;
-            this->path_points.pose.position.y=path_state.y * this->resolution;
-            this->pose_array.push_back(this->path_points);
-        }
-        
-        RCLCPP_INFO(this->get_logger(), "Path updated");       
+        this->dstar.updateGoal(this->goal_x / this->resolution, this->goal_y / this->resolution);  
 
     }
 
-    void initial_pose(const nav_msgs::msg::Odometry::SharedPtr pose){
+    void pose_callback(const nav_msgs::msg::Odometry::SharedPtr pose){
+        
         this->start_x=pose->pose.pose.position.x;
         this->start_y=pose->pose.pose.position.y;
         this->flag_0=true;
+        
     }
 
 
