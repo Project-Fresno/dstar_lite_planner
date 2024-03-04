@@ -6,6 +6,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "nav_msgs/msg/path.hpp"
 #include "nav_msgs/msg/occupancy_grid.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "Dstar.h"
@@ -22,6 +23,7 @@ class PathPlanner : public rclcpp::Node
         path_publisher = this->create_publisher<nav_msgs::msg::Path>("path", 10);
         map_subscription = this->create_subscription<nav_msgs::msg::OccupancyGrid>("map", 10, std::bind(&PathPlanner::map_callback, this, _1));
         goal_subscription=this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose",10,std::bind(&PathPlanner::goal_callback,this,_1));
+        pose_subscription=this->create_subscription<nav_msgs::msg::Odometry>("odom",10,std::bind(&PathPlanner::initial_pose,this,_1));
         timer_ = this->create_wall_timer(50ms, std::bind(&PathPlanner::timer_callback, this));
     }
 
@@ -43,6 +45,10 @@ class PathPlanner : public rclcpp::Node
     bool once=false;
     float inflation_m=0.1;
     int inflation;
+    bool flag_0=false;
+    bool flag_1=false;
+
+    float start_x, start_y;
 
     float goal_x, goal_y;
     
@@ -74,6 +80,13 @@ class PathPlanner : public rclcpp::Node
         if(this->once==false){
             this->dstar.init(0,0,0,0);
             this->once=true;}
+
+        if(this->flag_0==true){
+            if(this->flag_1==false){
+                dstar.updateStart(this->start_x / this->resolution, this->start_y / this->resolution);
+                this->flag_1=true;
+            }
+        }
 
         int count=0;
                
@@ -135,9 +148,16 @@ class PathPlanner : public rclcpp::Node
 
     }
 
+    void initial_pose(const nav_msgs::msg::Odometry::SharedPtr pose){
+        this->start_x=pose->pose.pose.position.x;
+        this->start_y=pose->pose.pose.position.y;
+        this->flag_0=true;
+    }
+
 
     rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_subscription;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr pose_subscription;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_publisher;
     
