@@ -24,7 +24,7 @@ class PathPlanner : public rclcpp::Node
         path_publisher = this->create_publisher<nav_msgs::msg::Path>("path", 10);
         map_subscription = this->create_subscription<nav_msgs::msg::OccupancyGrid>("map", 10, std::bind(&PathPlanner::map_callback, this, _1));
         goal_subscription=this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose",10,std::bind(&PathPlanner::goal_callback,this,_1));
-        pose_subscription=this->create_subscription<nav_msgs::msg::Odometry>("odometry/filtered",10,std::bind(&PathPlanner::pose_callback,this,_1));
+        pose_subscription=this->create_subscription<nav_msgs::msg::Odometry>("odom",10,std::bind(&PathPlanner::pose_callback,this,_1));
         timer_ = this->create_wall_timer(30ms, std::bind(&PathPlanner::timer_callback, this));
     }
 
@@ -53,7 +53,7 @@ class PathPlanner : public rclcpp::Node
 
     float start_x, start_y;
 
-    float goal_x, goal_y;
+    float goal_x, goal_y=0;
     
 
     void timer_callback()
@@ -106,10 +106,12 @@ class PathPlanner : public rclcpp::Node
         for(int i=0; i<this->map_height; i++){
             for(int j=0; j<this->map_width; j++){
 
-                if(this->map_data[count]>this->threshold){
+                // if(this->map_data[count]>this->threshold){
 
-                            this->dstar.updateCell(j+this->start_col,  i+this->start_row, -1);
-                    }
+                //             this->dstar.updateCell(j+this->start_col,  i+this->start_row, -1);
+                //     }
+                if(this->map_data[count]==-1) ;
+                else this->dstar.updateCell(j+this->start_col,  i+this->start_row, this->map_data[count]+sqrt(pow((this->goal_x-this->start_x) / this->resolution,2)+pow((this->goal_y-this->start_y) / this->resolution,2)));
 
                 count++;
             }
