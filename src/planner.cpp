@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <cmath>
 
 #include "rclcpp/rclcpp.hpp"
 #include "nav_msgs/msg/path.hpp"
@@ -41,10 +42,10 @@ class PathPlanner : public rclcpp::Node
     float resolution=0.1;
     std::vector<int8_t> map_data;
 
+    float yaw;
+
     int threshold=80;
     bool once=false;
-    float inflation_m=0.3;
-    int inflation;
 
     bool flag_0=false;
     bool flag_1=false;
@@ -98,9 +99,6 @@ class PathPlanner : public rclcpp::Node
         this->map_height = map->info.height;
         this->map_data=map->data;
 
-        this->inflation = this->inflation_m / this->resolution;
-        RCLCPP_INFO(this->get_logger(), "Inflation: %i", this->inflation);
-
         int count=0;
 
         this->flag_1=false;
@@ -109,20 +107,15 @@ class PathPlanner : public rclcpp::Node
             for(int j=0; j<this->map_width; j++){
 
                 if(this->map_data[count]>this->threshold){
-                    for(int k=0; k<this->inflation; k++){
-                        for(int l=0; l<this->inflation; l++){
-                            this->dstar.updateCell(j+l+this->start_col,  i+k+this->start_row, -1);
-                            this->dstar.updateCell(j+l+this->start_col,  i-k+this->start_row, -1);
-                            this->dstar.updateCell(j-l+this->start_col,  i+k+this->start_row, -1);
-                            this->dstar.updateCell(j-l+this->start_col,  i-k+this->start_row, -1);
-                    }}}
+
+                            this->dstar.updateCell(j+this->start_col,  i+this->start_row, -1);
+                    }
 
                 count++;
             }
         }
    
-        RCLCPP_INFO(this->get_logger(), "Planning done"); 
-
+        RCLCPP_INFO(this->get_logger(), "Map updated"); 
         this->flag_1=true; 
     
     }
@@ -142,6 +135,9 @@ class PathPlanner : public rclcpp::Node
         
         this->start_x=pose->pose.pose.position.x;
         this->start_y=pose->pose.pose.position.y;
+        // double siny_cosp = 2 * (pose.pose.orientation.w * pose.pose.orientation.z + pose.pose.orientation.x * pose.pose.orientation.y);
+        // double cosy_cosp = 1 - 2 * (pose.pose.orientation.y* pose.pose.orientation.y+ pose.pose.orientation.z * pose.pose.orientation.z);
+        // this->yaw = std::atan2(siny_cosp, cosy_cosp);
         this->flag_0=true;
         
     }
