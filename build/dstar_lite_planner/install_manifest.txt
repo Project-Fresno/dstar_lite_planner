@@ -1,0 +1,17 @@
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/lib/dstar_lite_planner/plan
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/lib/dstar_lite_planner/test_
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/ament_index/resource_index/package_run_dependencies/dstar_lite_planner
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/ament_index/resource_index/parent_prefix_path/dstar_lite_planner
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/environment/ament_prefix_path.sh
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/environment/ament_prefix_path.dsv
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/environment/path.sh
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/environment/path.dsv
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/local_setup.bash
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/local_setup.sh
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/local_setup.zsh
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/local_setup.dsv
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/package.dsv
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/ament_index/resource_index/packages/dstar_lite_planner
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/cmake/dstar_lite_plannerConfig.cmake
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/cmake/dstar_lite_plannerConfig-version.cmake
+/home/hemanth/ws/src/dstar_lite_planner/install/dstar_lite_planner/share/dstar_lite_planner/package.xml

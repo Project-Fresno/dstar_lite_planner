@@ -111,7 +111,7 @@ class PathPlanner : public rclcpp::Node
                 //             this->dstar.updateCell(j+this->start_col,  i+this->start_row, -1);
                 //     }
                 if(this->map_data[count]==-1) ;
-                else this->dstar.updateCell(j+this->start_col,  i+this->start_row, this->map_data[count]+sqrt(pow((this->goal_x-this->start_x) / this->resolution,2)+pow((this->goal_y-this->start_y) / this->resolution,2)));
+                else this->dstar.updateCell(j+this->start_col,  i+this->start_row, this->map_data[count]);//+sqrt(pow((this->goal_x-this->start_x) / this->resolution,2)+pow((this->goal_y-this->start_y) / this->resolution,2)));
 
                 count++;
             }
